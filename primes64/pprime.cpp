@@ -91,7 +91,7 @@ static uint_t udump64(char * __restrict__ buf, uint64_t x)
 		l += DK;
 	}
 
-	{
+	do {
 		uint32_t r = x;
 		uint32_t r1 = r / DP, r0 = r % DP;
 
@@ -99,10 +99,14 @@ static uint_t udump64(char * __restrict__ buf, uint64_t x)
 			buf[l + j] = udump_base[r0][j];
 		l += DK;
 
+		if (r1 <= 0)
+			break;
+
 		for (uint_t j = 0; j < DK; j++)
 			buf[l + j] = udump_base[r1][j];
 		l += DK;
-	}
+
+	} while (0);
 
 	for (; l > 1 && buf[l - 1] == '0'; l--)
 		;
