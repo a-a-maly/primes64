@@ -123,6 +123,11 @@ int main(int ac, char **av)
 		}
 	}
 
+	if ((mode & 1) && isatty(1)) {
+		fprintf(stderr, "Cowardly refusing to dump binary data to a terminal. \n");
+		exit(1);
+	}
+
 	if (ac - optind > 2)
 		usage();
 
