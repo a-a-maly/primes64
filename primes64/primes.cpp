@@ -280,6 +280,7 @@ void primes(uint64_t start, uint64_t stop)
 	tprimes_init(start, tmul);
 
 	std::vector<Event64> sevs;
+	sevs.reserve(0x1a00000);
 
 	uint64_t cnt_dd = q_len / (GS * tdiv);
 	fprintf(stderr, "cnt_dd=%" PRIu64 " \n", cnt_dd);
