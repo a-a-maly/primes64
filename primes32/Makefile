@@ -8,6 +8,7 @@ SOURCES=main.cpp primes.cpp pprime.cpp
 OBJECTS=$(SOURCES:%.cpp=%.o)
 TARGET=primes32
 
+all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
 	$(LD) -o $@ $^ $(LDFLAGS)
@@ -17,3 +18,5 @@ clean:
 
 %.o: primes.h
 primes.o: bitset.h
+
+.PHONY: all clean
