@@ -134,7 +134,7 @@ void pprime(uint64_t p)
 	if (dp >> 16) {
 		fprintf(stderr, "p_prev=%" PRIu64 ", p=%" PRIu64 ", dp=%" PRIu64 " \n",
 			prime_prev, p, dp);
-		abort();
+		assert (0);
 	}
 
 	switch (mode & 3) {
@@ -166,16 +166,15 @@ void pprime(uint64_t p)
 }
 
 
-void pprime_init(uint64_t po)
+void pprime_init()
 {
-	prime_prev = po;
 	udump_init();
 }
 
 
-void summary_init()
+void summary_init(uint64_t po)
 {
-	prime_prev = 0;
+	prime_prev = po;
 	primes_cnt = 0;
 	primes_sum0 = 0;
 	primes_sum1 = 0;

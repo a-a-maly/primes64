@@ -229,8 +229,8 @@ void fill_sdevs(std::vector<uint8_t> &sdiffs, uint_t maxsp)
 
 void primes(uint64_t start, uint64_t stop)
 {
-	pprime_init(start);
-	summary_init();
+	pprime_init();
+	summary_init(start);
 
 	for (uint_t i = 0; i < tprimes_n; i++) {
 		uint32_t pi = tprimes[i];
