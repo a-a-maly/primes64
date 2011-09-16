@@ -230,9 +230,7 @@ void fill_sdevs(std::vector<uint8_t> &sdiffs, uint_t maxsp)
 void primes(uint64_t start, uint64_t stop)
 {
 	pprime_init(start);
-	primes_cnt = 0;
-	primes_sum0 = 0;
-	primes_sum1 = 0;
+	summary_init();
 
 	for (uint_t i = 0; i < tprimes_n; i++) {
 		uint32_t pi = tprimes[i];
@@ -247,8 +245,10 @@ void primes(uint64_t start, uint64_t stop)
 
 	start |= 1;
 	stop &= ~1;
-	if (stop <= start)
+	if (stop <= start) {
+		summary_print();
 		return;
+	}
 
 	uint64_t q_min = start / 2, q_lim = stop / 2, q_len = q_lim - q_min;
 	fprintf(stderr, "q_min=%" PRIu64 ", q_lim=%" PRIu64 " \n",
@@ -361,7 +361,6 @@ void primes(uint64_t start, uint64_t stop)
 
 	}
 
-	fprintf(stderr, "totally %" PRIu64 " primes with sum=%" PRIu64 ":%" PRIu64 " \n",
-		primes_cnt, primes_sum0, primes_sum1);
+	summary_print();
 }
 

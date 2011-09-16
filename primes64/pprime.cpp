@@ -20,7 +20,7 @@ static char udump_base[DP][DK];
 static void udump_init()
 {
 	char a[DK];
-	
+
 	for (uint_t i = 0; i < DK; i++)
 		a[i] = '0';
 
@@ -36,7 +36,7 @@ static void udump_init()
 		}
 		break;
 
-cont1:;		
+cont1:;
 	}
 }
 
@@ -170,5 +170,23 @@ void pprime_init(uint64_t po)
 {
 	prime_prev = po;
 	udump_init();
+}
+
+
+void summary_init()
+{
+	prime_prev = 0;
+	primes_cnt = 0;
+	primes_sum0 = 0;
+	primes_sum1 = 0;
+}
+
+
+void summary_print()
+{
+	fprintf(stderr, "totally %" PRIu64 " primes, ", primes_cnt);
+	fprintf(stderr, "last one is %" PRIu64 " \n", prime_prev);
+	fprintf(stderr, "sum is %" PRIu64 " + 2^64 * %" PRIu64 " \n",
+		primes_sum0, primes_sum1);
 }
 
