@@ -6,6 +6,7 @@
 #include <endian.h>
 #include "primes.h"
 
+uint64_t loglevel;
 uint_t mode;
 uint64_t primes_cnt;
 uint64_t primes_sum0, primes_sum1;
@@ -183,9 +184,11 @@ void summary_init(uint64_t po)
 
 void summary_print()
 {
-	fprintf(stderr, "totally %" PRIu64 " primes, ", primes_cnt);
-	fprintf(stderr, "last one is %" PRIu64 " \n", prime_prev);
-	fprintf(stderr, "sum is %" PRIu64 " + 2^64 * %" PRIu64 " \n",
-		primes_sum0, primes_sum1);
+	if (loglevel >= 1) {
+		fprintf(stderr, "totally %" PRIu64 " primes, ", primes_cnt);
+		fprintf(stderr, "last one is %" PRIu64 " \n", prime_prev);
+		fprintf(stderr, "sum is %" PRIu64 " + 2^64 * %" PRIu64 " \n",
+			primes_sum0, primes_sum1);
+	}
 }
 

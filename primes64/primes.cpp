@@ -9,7 +9,7 @@
 #include "primes.h"
 
 
-static uint_t GS = 28;
+static const uint_t GS = 28;
 
 
 uint_t sqrtu32(uint32_t x)
@@ -26,7 +26,6 @@ uint_t sqrtu32(uint32_t x)
 			b = c - 1;
 	}
 
-	fprintf(stderr, "sqrt(%u)=%u \n", x, a);
 	return a;
 }
 
@@ -46,7 +45,10 @@ uint_t sqrtu64(uint64_t x)
 			b = c - 1;
 	}
 
+#if 0
 	fprintf(stderr, "sqrt(%" PRIu64 ")=%u \n", x, (uint_t) a);
+#endif
+
 	return a;
 }
 
@@ -70,7 +72,10 @@ struct Primes32
 
 	void init(uint_t _pmax)
 	{
-		fprintf(stderr, "Primes::init _pmax=%u \n", _pmax);
+		if (loglevel >= 4) {
+			fprintf(stderr, "%s(%u) \n", __func__, _pmax);
+		}
+
 		pmax = _pmax;
 		size = pmax / 2 + pmax % 2;
 		bits.init(size);
@@ -100,8 +105,13 @@ static const uint_t tprimes_n = sizeof(tprimes) / sizeof(tprimes[0]);
 static uint32_t tprimes_max = tprimes[tprimes_n - 1];
 static Bitset<uint32_t, uint32_t> tprimes_mask;
 
+
 static void tprimes_init(uint64_t _start, uint_t tmul)
 {
+	if (loglevel >= 3) {
+		fprintf(stderr, "%s(%" PRIu64 ", %u) \n", __func__, _start, tmul);
+	}
+
 	uint_t tdiv = tmul * tprimes_div;
 	uint_t start = _start % (2 * tdiv);
 	tprimes_mask.init(tdiv);
@@ -116,32 +126,22 @@ static void tprimes_init(uint64_t _start, uint_t tmul)
 	}
 }
 
-void fill_sdevs(std::vector<uint8_t> &sdiffs, uint_t maxsp)
+
+void fill_sdiffs(std::vector<uint8_t> &sdiffs, uint_t maxsp)
 {
-#if 0
-	uint_t i_min = (tprimes_max + 1) / 2;
-	uint_t i_lim = (maxsp + 1) / 2;	
-
-	Primes32 sprimes;
-	sprimes.init(maxsp);
-
-	fprintf(stderr, "sprimes inited \n");
-
-	uint_t i_o = 0;
-	for (uint_t i = i_min; i < i_lim; i++) {
-		if (sprimes.bits.is_set(i))
-			continue;
-		sdevs.push_back(i - i_o);
-		i_o = i;
-	}
-#else
 	sdiffs.resize(0);
 
 	uint32_t p_min = (tprimes_max + 1) / 2;
 	uint32_t p_lim = maxsp / 2 + maxsp % 2;
 	uint32_t p_len = p_lim - p_min;
 
-	fprintf(stderr, "p_min=%u, p_lim=%u, p_len=%u \n", p_min, p_lim, p_len);
+	if (loglevel >= 3) {
+		fprintf(
+			stderr,
+			"%s([], %u): %u prime indexes in [%u, %u) \n",
+			__func__, maxsp, p_len, p_min, p_lim
+		);
+	}
 
 	if (p_lim <= p_min)
 		return;
@@ -150,8 +150,14 @@ void fill_sdevs(std::vector<uint8_t> &sdiffs, uint_t maxsp)
 	uint32_t si_min = (tprimes_max + 1) / 2;
 	uint32_t si_lim = (maxssp + 1) / 2;
 
-	fprintf(stderr, "maxssp=%u, si_min=%u, si_lim=%u \n",
-		maxssp, si_min, si_lim);
+	if (loglevel >= 3) {
+		fprintf(
+			stderr,
+			"%s: sieving very small primes in (%u, %u], "
+			"indexes in [%u, %u) \n",
+			__func__, tprimes_max, maxssp, si_min, si_lim
+		);
+	}
 
 	Primes32 ssprimes;
 	ssprimes.init(maxssp);
@@ -179,14 +185,22 @@ void fill_sdevs(std::vector<uint8_t> &sdiffs, uint_t maxsp)
 	}
 
 	uint_t nssevs = ssevs.size();
-	fprintf(stderr, "nssevs=%u \n", nssevs);
+	if (loglevel >= 3) {
+		fprintf(stderr, "%s: found %u very small events \n",
+			__func__, nssevs);
+	}
 
 	uint32_t tdiv = tprimes_div;
 	tprimes_init(p_min * 2 + 1, 1);
 
 	uint32_t cnt_d = p_len / tdiv;
 	uint32_t cnt_m = p_len % tdiv;
-	fprintf(stderr, "cnt_d=%u, cnt_m=%u \n", cnt_d, cnt_m);
+
+	if (loglevel >= 3) {
+		fprintf(stderr, "%s: %u is %u full segments of size %u plus %u rest \n",
+			__func__, p_len, cnt_d, tdiv, cnt_m);
+	}
+
 	Bitset<uint32_t, uint32_t> bits;
 	uint_t i_c = 0;
 
@@ -199,9 +213,12 @@ void fill_sdevs(std::vector<uint8_t> &sdiffs, uint_t maxsp)
 			i_lim = p_lim;
 		}
 		uint_t i_len = i_lim - i_min;
-#if 0
-		fprintf(stderr, "j=%u, i in [%u,%u) \n", j, i_min, i_lim);
-#endif
+
+		if (loglevel >= 4) {
+			fprintf(stderr, "%s: segment #%u is [%u, %u) \n",
+				__func__, j, i_min, i_lim);
+		}
+
 		bits = tprimes_mask;
 		for (uint_t k = 0; k < nssevs; k++) {
 			Event32 &ek = ssevs[k];
@@ -223,7 +240,7 @@ void fill_sdevs(std::vector<uint8_t> &sdiffs, uint_t maxsp)
 			i_c = i;
 		}
 	}
-#endif
+
 }
 
 
@@ -251,8 +268,15 @@ void primes(uint64_t start, uint64_t stop)
 	}
 
 	uint64_t q_min = start / 2, q_lim = stop / 2, q_len = q_lim - q_min;
-	fprintf(stderr, "q_min=%" PRIu64 ", q_lim=%" PRIu64 " \n",
-		q_min, q_lim);
+
+	if (loglevel >= 2) {
+		fprintf(
+			stderr,
+			"%s(%" PRIu64 ", %" PRIu64 "): "
+			"%" PRIu64 " indexes in [%" PRIu64 ", %" PRIu64 ") \n",
+			__func__, start, stop, q_len, q_min, q_lim
+		);
+	}
 
 	uint32_t maxsp = sqrtu64(stop - 1);
 	double maxspl = log(maxsp);
@@ -264,26 +288,38 @@ void primes(uint64_t start, uint64_t stop)
 	uint_t tmul = 1 + maxspl2i;
 	uint_t tdiv = tprimes_div * tmul;
 	uint_t sres = (maxsp <= 16 ? 0 : 1 + floor(maxsp / (maxspl - 1.1)));
+	uint64_t cnt_dd = q_len / (GS * tdiv);
 
-	fprintf(stderr, "q_len=%" PRIu64 ", maxsp=%u \n", q_len, maxsp);
-	fprintf(stderr, "tmul=%u, tdiv=%u, sres=%u \n", tmul, tdiv, sres);
+	if (loglevel >= 2) {
+		fprintf(
+			stderr,
+			"%s: %" PRIu64 " full groups of %u intervals "
+			"of %u * %u = %u size each \n",
+			__func__, cnt_dd, GS, tmul, tprimes_div, tdiv
+		);
+		fprintf(
+			stderr,
+			"%s: small primes will be up to %u, appr. %u of them \n",
+			__func__, maxsp, sres
+		);
+	}
 
-	std::vector<uint8_t> sdevs;
-	sdevs.reserve(sres);
+	std::vector<uint8_t> sdiffs;
+	sdiffs.reserve(sres);
+	fill_sdiffs(sdiffs, maxsp);
 
-	fill_sdevs(sdevs, maxsp);
+	uint_t sdsize = sdiffs.size();
 
-	uint_t sdsize = sdevs.size();
-	fprintf(stderr, "sdevs.size=%u \n", sdsize);
+	if (loglevel >= 2) {
+		fprintf(stderr, "%s: really found %u small primes \n",
+			__func__, sdsize);
+	}
 
 	Bitset<uint32_t, uint32_t> bits;
 	tprimes_init(start, tmul);
 
 	std::vector<Event64> sevs;
 	sevs.reserve(0x1a00000);
-
-	uint64_t cnt_dd = q_len / (GS * tdiv);
-	fprintf(stderr, "cnt_dd=%" PRIu64 " \n", cnt_dd);
 
 	for (uint64_t k = 0; k <= cnt_dd; k++) {
 		uint64_t g_min = q_min + k * (GS * tdiv);
@@ -298,7 +334,7 @@ void primes(uint64_t start, uint64_t stop)
 		sevs.resize(0);
 		uint_t i_c = 0;
 		for (uint_t i = 0; i < sdsize; i++) {
-			i_c += sdevs[i];
+			i_c += sdiffs[i];
 
 			uint32_t pi = 2 * i_c + 1;
 			uint64_t j = (2 * g_min) / pi;
@@ -317,17 +353,18 @@ void primes(uint64_t start, uint64_t stop)
 			sevs.push_back(ei);
 		}
 		uint_t nsevs = sevs.size();
-
 		uint64_t cnt_d = g_len / tdiv;
-#if 0
-		fprintf(
-			stderr,
-			"k=%" PRIu64 ", g_min=%" PRIu64 ", "
-			"g_lim=%" PRIu64 ", g_len=%" PRIu64 ", "
-			"nsevs=%u, cnt_d=%" PRIu64 " \n",
-			k, g_min, g_lim, g_len,  nsevs, cnt_d
-		);
-#endif
+
+		if (loglevel >= 4) {
+			fprintf(
+				stderr,
+				"%s: group #%" PRIu64 "/%" PRIu64 " "
+				"is [%" PRIu64 ", %" PRIu64 ") \n length is %" PRIu64 ", "
+				"or %" PRIu64 " full intervals; %u events ready. \n",
+				__func__, k, cnt_dd, g_min, g_lim, g_len, cnt_d, nsevs
+			);
+		}
+
 		for (uint64_t j = 0; j <= cnt_d; j++) {
 			uint64_t i_min = g_min + j * tdiv;
 			uint64_t i_lim = i_min + tdiv;

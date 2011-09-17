@@ -9,7 +9,7 @@
 
 void usage()
 {
-	fprintf(stderr, "usage: primes64 [-t] [-b] [-a] [-d] [start [stop]] \n");
+	fprintf(stderr, "usage: primes64 [-t] [-b] [-a] [-d] [[start] stop] -v <N> \n");
 	exit(1);
 }
 
@@ -92,9 +92,10 @@ int main(int ac, char **av)
 {
 	uint64_t start = 0, stop = 0;
 	mode = 0;
+	loglevel = 1;
 
 	for (;;) {
-		int opt = getopt(ac, av, "btad");
+		int opt = getopt(ac, av, "btadv::");
 		if (opt == -1)
 			break;
 		switch (opt) {
@@ -102,6 +103,15 @@ int main(int ac, char **av)
 		case 't': mode &= ~1; break;
 		case 'd': mode |= 2; break;
 		case 'a': mode &= ~2; break;
+		case 'v': {
+			if (optarg == NULL) {
+				loglevel++;
+			} else {
+				loglevel = atou64(optarg);
+			}
+		}
+		break;
+
 		default: usage();
 		}
 	}
@@ -133,8 +143,11 @@ int main(int ac, char **av)
 		exit(1);
 	}
 
-	fprintf(stderr, "start=%" PRIu64 ", stop=%" PRIu64 ", mode=0x%x \n",
-		start, stop, mode);
+	if (loglevel >= 1) {
+		fprintf(stderr, "start=%" PRIu64 ", stop=%" PRIu64 ", ", start, stop);
+		fprintf(stderr, "mode=0x%x, loglevel=%" PRIu64 " \n", mode, loglevel);
+	}
+
 	primes(start, stop);
 
 	return 0;

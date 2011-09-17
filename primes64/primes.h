@@ -3,7 +3,8 @@
 
 #include <inttypes.h>
 typedef unsigned int uint_t;
-extern uint_t mode, loglevel;
+extern uint_t mode;
+extern uint64_t loglevel;
 
 void primes(uint64_t start, uint64_t stop);
 void pprime(uint64_t p);
