@@ -100,10 +100,10 @@ static const uint_t tprimes_n = sizeof(tprimes) / sizeof(tprimes[0]);
 static uint32_t tprimes_max = tprimes[tprimes_n - 1];
 static Bitset<uint32_t, uint32_t> tprimes_mask;
 
-static void tprimes_init(uint_t start, uint_t tmul)
+static void tprimes_init(uint64_t _start, uint_t tmul)
 {
 	uint_t tdiv = tmul * tprimes_div;
-	start %= 2 * tdiv;
+	uint_t start = _start % (2 * tdiv);
 	tprimes_mask.init(tdiv);
 	for (uint_t i = 0; i < tdiv; i++) {
 		uint_t pi = 2 * i + start;
